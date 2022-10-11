@@ -48,7 +48,9 @@ func doCommand(w http.ResponseWriter, cmd string, arg ...string) error {
 		if err != nil {
 			break
 		}
-		w.Write(line)
+		str_line := string(line)
+		str_line = strings.ReplaceAll(str_line, "textarea", "kextarea")
+		w.Write([]byte(str_line))
 		w.Write([]byte("\n"))
 		fmt.Println(string(line))
 	}
