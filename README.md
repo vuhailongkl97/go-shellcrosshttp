@@ -35,6 +35,6 @@ go run main.go
 
 * Currently this software support Chrome properly.
 
-# Limitation
+* Don't try to use keep session shell commands like `top`, `ping`. it won't show the result.
 
-* Don't try to use keep session shell commands like `top`, `ping`. Currently it will hang, coundn't stop it unless reboot the target or you must able to remote to the remote and restart `go-shellcrosshttp` program 
+* Can't use pipeline command like `ps | grep abc`. It doesn't work  
