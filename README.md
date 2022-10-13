@@ -18,8 +18,8 @@ from host open  <target ip>:1997 on your browser. For testing you also can run d
 
 # Build & run
 * build one binary without any library dependencies (pthread) -> make output binary is big (~6.3MB)  
-`CGO_ENABLED=0 go build `
-* build if the target have below dependencies 
+* use `CGO_ENABLED=0 go build `
+to build if the target have below dependencies 
 ```
 linux-vdso.so.1 (0x00007fffb48fe000)
 libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f66a4bec000)
@@ -28,7 +28,8 @@ libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f66a49c4000)
 
 ```
 # Test 
-go run main.go
+* run normal `go run main.go`
+* run with debug infomation `go run main.go -debug`
 
 # Note  
 * default port is *1997*
@@ -38,3 +39,5 @@ go run main.go
 * Don't try to use keep session shell commands like `top`, `ping`. it won't show the result.
 
 * Can't use pipeline command like `ps | grep abc`. It doesn't work  
+
+
