@@ -64,15 +64,13 @@ func doCommand(w http.ResponseWriter, cmd string, arg ...string) error {
 		str_line = strings.ReplaceAll(str_line, "textarea", "kextarea")
 		w.Write([]byte(str_line))
 		w.Write([]byte("\n"))
-		if *debug {
+		if debug != nil && *debug {
 			fmt.Println(string(line))
 		}
 	}
 	w.Write([]byte("</textarea>"))
 
-	l_cmd.Wait()
-	return nil
-
+	return l_cmd.Wait()
 }
 
 func handleGET(w http.ResponseWriter, req *http.Request) {
@@ -89,10 +87,11 @@ func handleGET(w http.ResponseWriter, req *http.Request) {
 	lcmd := strings.Fields(decodedValue)
 	if err != nil || len(lcmd) == 0 {
 		sendForm(w)
+		fmt.Fprintf(w, "missing arguments")
 		return
 	}
 
-	if *debug == true {
+	if debug != nil && *debug {
 		fmt.Printf("doing %v\n", lcmd)
 	}
 	if len(lcmd) > 1 {
@@ -103,6 +102,7 @@ func handleGET(w http.ResponseWriter, req *http.Request) {
 
 	if err != nil {
 		sendForm(w)
+		fmt.Fprintf(w, "Error : %v", err)
 		return
 	}
 
@@ -113,14 +113,14 @@ func handler(w http.ResponseWriter, req *http.Request) {
 	case http.MethodGet:
 		handleGET(w, req)
 	default:
-		if *debug {
+		if debug != nil && *debug {
 			fmt.Printf("haven't support this case %v\n", req.Method)
 		}
 	}
 
 }
 func uploadFile(w http.ResponseWriter, r *http.Request) {
-	if *debug {
+	if debug != nil && *debug {
 		//fmt.Println("File Upload Endpoint Hit")
 	}
 
@@ -132,7 +132,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// the Header and the size of the file
 	file, handler, err := r.FormFile("myFile")
 	if err != nil {
-		if *debug {
+		if debug != nil && *debug {
 			fmt.Println("Error Retrieving the File")
 			fmt.Println(err)
 		}
@@ -140,7 +140,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	if *debug {
+	if debug != nil && *debug {
 		fmt.Printf("Uploaded File: %+v\n", handler.Filename)
 		fmt.Printf("File Size: %+v\n", handler.Size)
 		fmt.Printf("MIME Header: %+v\n", handler.Header)
@@ -153,7 +153,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 		err = os.Mkdir("uploads", os.ModePerm)
 		if err != nil {
 
-			if *debug {
+			if debug != nil && *debug {
 				fmt.Printf("error happend %v\n", err)
 			}
 			return
@@ -176,7 +176,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	tempFile.Write(fileBytes)
 	// return that we have successfully uploaded our file!
 	sendForm(w)
-	fmt.Fprintf(w, "Success uploaded file\n")
+	fmt.Fprintf(w, "Success uploaded file")
 
 }
 
